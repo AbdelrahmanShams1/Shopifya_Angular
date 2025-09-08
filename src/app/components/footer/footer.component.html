@@ -1,0 +1,181 @@
+   <footer class="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white relative overflow-hidden">
+      
+     
+      <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse" 
+             style="animation-delay: 2s;"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-indigo-500/5 rounded-full blur-3xl animate-pulse" 
+             style="animation-delay: 4s;"></div>
+      </div>
+
+      <div class="relative z-10">
+      
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            
+           
+            <div class="lg:col-span-1">
+              <div class="mb-6">
+             
+                <div class="flex items-center mb-4">
+                  <div class="relative group">
+                    <a
+          routerLink=""
+          class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
+        >
+          Shopifya
+        </a>
+              
+                  </div>
+                </div>
+                
+                <p class="text-gray-300 mb-6 leading-relaxed">
+                  Crafting exceptional digital experiences with innovation and creativity. 
+                  Your success is our mission.
+                </p>
+               
+                <div class="flex space-x-4">
+                  <a *ngFor="let social of socialLinks; trackBy: trackBySocial" 
+                     [href]="social.href"
+                     class="group relative p-3 bg-gray-800/50 rounded-lg transition-all duration-300 ease-in-out
+                            
+                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900">
+                    
+                    <i [class]="social.icon + ' ' + social.color + ' transition-colors duration-300'"></i>
+
+                    <div class="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500/0 to-purple-500/0
+                               group-hover:from-blue-500/20 group-hover:to-purple-500/20
+                               transition-all duration-300 -z-10"></div>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+         
+            <div class="lg:col-span-1">
+              <h3 class="text-lg font-semibold mb-6 relative">
+                Quick Links
+                <div class="absolute bottom-0 left-0 w-12 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+              </h3>
+              <ul class="space-y-3">
+                <li *ngFor="let link of quickLinks; trackBy: trackByLink">
+                  <a routerLink="{{link.href}}" 
+                     class="text-gray-300 hover:text-white transition-all duration-300 ease-in-out
+                            relative group inline-block">
+                    {{ link.label }}
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500
+                                 group-hover:w-full transition-all duration-300"></span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+        
+            <div class="lg:col-span-1">
+              <h3 class="text-lg font-semibold mb-6 relative">
+                Services
+                <div class="absolute bottom-0 left-0 w-12 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+              </h3>
+              <ul class="space-y-3">
+                <li *ngFor="let service of services; trackBy: trackByService">
+                  <a [href]="service.href" 
+                     class="text-gray-300 hover:text-white transition-all duration-300 ease-in-out
+                            relative group inline-block">
+                    {{ service.label }}
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500
+                                 group-hover:w-full transition-all duration-300"></span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+           
+            <div class="lg:col-span-1">
+              <h3 class="text-lg font-semibold mb-6 relative">
+                Stay Updated
+                <div class="absolute bottom-0 left-0 w-12 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+              </h3>
+              <p class="text-gray-300 mb-4">
+                Subscribe to our newsletter for the latest updates and insights.
+              </p>
+              
+              <div class="space-y-4">
+                <div class="relative">
+                  <input 
+                    type="email" 
+                    placeholder="Enter your email"
+                    [(ngModel)]="emailInput"
+                    class="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                           text-white placeholder-gray-400 transition-all duration-300">
+                  <div class="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500/0 to-purple-500/0
+                             hover:from-blue-500/5 hover:to-purple-500/5 transition-all duration-300 pointer-events-none"></div>
+                </div>
+                
+                <button 
+                  (click)="subscribe()"
+                  class="w-full px-6 py-3 cursor-pointer bg-gradient-to-r from-blue-600 to-purple-600 text-white
+                         rounded-lg font-medium transition-all duration-300 ease-in-out
+                         hover:from-purple-600 hover:to-pink-600 transform hover:scale-105 hover:shadow-lg
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900
+                         disabled:opacity-50 disabled:cursor-not-allowed group">
+                  <span class="flex items-center justify-center">
+                    <span [ngClass]="{ 'opacity-0': isSubscribing }">Subscribe</span>
+                    <div *ngIf="isSubscribing" class="absolute">
+                      <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    </div>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+       
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-700"></div>
+          </div>
+          <div class="relative flex justify-center">
+            <div class="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse"></div>
+          </div>
+        </div>
+
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            
+           
+            <div class="text-gray-400 text-sm">
+              <p>&copy; {{ currentYear }} YourCompany. All rights reserved.</p>
+            </div>
+
+          
+            <div class="flex space-x-6">
+              <a *ngFor="let link of bottomLinks; trackBy: trackByBottomLink" 
+                 [href]="link.href"
+                 class="text-gray-400 hover:text-white text-sm transition-colors duration-300
+                        relative group">
+                {{ link.label }}
+                <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500
+                             group-hover:w-full transition-all duration-300"></span>
+              </a>
+            </div>
+
+           
+            <button 
+              (click)="scrollToTop()"
+              class="p-3 cursor-pointer bg-gray-800/50 rounded-full transition-all duration-300 ease-in-out
+                     hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 hover:scale-110
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900
+                     group">
+              <svg class="w-5 h-5 text-gray-300 group-hover:text-white transition-colors duration-300" 
+                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </footer>

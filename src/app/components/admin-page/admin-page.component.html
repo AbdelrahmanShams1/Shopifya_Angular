@@ -1,0 +1,553 @@
+<div class="admin-container">
+  <!-- Navigation Tabs -->
+  <div class="admin-nav">
+    <button 
+      class="nav-btn" 
+      [class.active]="activeSection === 'users'"
+      (click)="switchSection('users')">
+      <i class="fa fa-users"></i>
+      User Management
+      <span class="nav-count">{{ users.length }}</span>
+    </button>
+    <button 
+      class="nav-btn" 
+      [class.active]="activeSection === 'products'"
+      (click)="switchSection('products')">
+      <i class="fa fa-box"></i>
+      Product Management
+      <span class="nav-count">{{ products.length }}</span>
+    </button>
+    <button 
+      class="nav-btn" 
+      [class.active]="activeSection === 'orders'"
+      (click)="switchSection('orders')">
+      <i class="fa fa-shopping-cart"></i>
+      Order Management
+      <span class="nav-count">{{ orders.length }}</span>
+    </button>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-section" *ngIf="!loading">
+    <div class="stat-card users-stat">
+      <div class="stat-icon">
+        <i class="fa fa-users"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ users.length }}</h3>
+        <p>Total Users</p>
+        <small>{{ getConfirmedUsersCount() }} Confirmed</small>
+      </div>
+    </div>
+
+    <div class="stat-card products-stat">
+      <div class="stat-icon">
+        <i class="fa fa-box"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ products.length }}</h3>
+        <p>Total Products</p>
+
+      </div>
+    </div>
+
+    <div class="stat-card orders-stat">
+      <div class="stat-icon">
+        <i class="fa fa-shopping-cart"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ orders.length }}</h3>
+        <p>Total Orders</p>
+        <small>{{ getPendingOrdersCount() }} Pending</small>
+      </div>
+    </div>
+
+    <div class="stat-card revenue-stat">
+      <div class="stat-icon">
+        <i class="fa fa-money-bill"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ formatPrice(getTotalRevenue()) }}</h3>
+        <p>Total Sales</p>
+        <small>From all orders</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
+
+  <!-- =============== USERS SECTION =============== -->
+  <div *ngIf="activeSection === 'users' && !loading" class="section">
+    <div class="section-header">
+      <h2><i class="fa fa-users"></i> User Management</h2>
+      <button class="btn btn-primary" (click)="startAddUser()">
+        <i class="fa fa-plus"></i>
+        Add New User
+      </button>
+    </div>
+
+    <div class="search-section">
+      <div class="search-box">
+        <i class="fa fa-search"></i>
+        <input 
+          type="text" 
+          [(ngModel)]="userSearchTerm" 
+          placeholder="Search for user (name or email)"
+          class="search-input">
+      </div>
+    </div>
+
+    <div class="users-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Age</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Created Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of filteredUsers" [class.editing]="selectedUser?._id === user._id">
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.age }}</td>
+            <td>
+              <span class="role-badge" [class.admin]="user.role === 'admin'">
+                {{ user.role === 'admin' ? 'Admin' : 'User' }}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge" [class.confirmed]="user.isConfirmed">
+                {{ user.isConfirmed ? 'Confirmed' : 'Unconfirmed' }}
+              </span>
+            </td>
+            <td>{{ formatDate(user.createdAt) }}</td>
+            <td class="actions">
+              <button 
+                class="btn btn-sm btn-edit" 
+                (click)="startEditUser(user)" 
+                [disabled]="loading">
+                <i class="fa fa-edit"></i>
+                Edit
+              </button>
+              <button 
+                class="btn btn-sm btn-toggle" 
+                (click)="toggleConfirmation(user)" 
+                [disabled]="loading">
+                <i class="fa fa-toggle-{{ user.isConfirmed ? 'on' : 'off' }}"></i>
+                {{ user.isConfirmed ? 'Unconfirm' : 'Confirm' }}
+              </button>
+              <button 
+                class="btn btn-sm btn-danger" 
+                (click)="deleteUser(user._id)" 
+                [disabled]="loading">
+                <i class="fa fa-trash"></i>
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="filteredUsers.length === 0" class="no-results">
+        <i class="fa fa-users"></i>
+        <p>No users found {{ userSearchTerm ? 'matching search' : '' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============== PRODUCTS SECTION =============== -->
+  <div *ngIf="activeSection === 'products' && !loading" class="section">
+    <div class="section-header">
+      <h2><i class="fa fa-box"></i> Product Management</h2>
+      <button class="btn btn-primary" (click)="startAddProduct()">
+        <i class="fa fa-plus"></i>
+        Add New Product
+      </button>
+    </div>
+
+    <div class="search-section">
+      <div class="search-box">
+        <i class="fa fa-search"></i>
+        <input 
+          type="text" 
+          [(ngModel)]="productSearchTerm" 
+          placeholder="Search for product (name or category)"
+          class="search-input">
+      </div>
+    </div>
+
+    <div class="products-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Category</th>
+            <th>Stock</th>
+          
+            <th>Created Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of filteredProducts" [class.editing]="selectedProduct?._id === product._id">
+            <td>
+              <img [src]="product.url || '/assets/no-image.png'" 
+                   alt="{{ product.name }}" 
+                   class="product-image">
+            </td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.description }}</td>
+            <td>{{ formatPrice(product.price) }}</td>
+            <td>{{ product.category }}</td>
+            <td>{{ product.stock }}</td>
+            
+            <td>{{ formatDate(product.createdAt) }}</td>
+            <td class="actions">
+              <button 
+                class="btn btn-sm btn-edit" 
+                (click)="startEditProduct(product)" 
+                [disabled]="loading">
+                <i class="fa fa-edit"></i>
+                Edit
+              </button>
+            
+              <button 
+                class="btn btn-sm btn-danger" 
+                (click)="deleteProduct(product._id)" 
+                [disabled]="loading">
+                <i class="fa fa-trash"></i>
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="filteredProducts.length === 0" class="no-results">
+        <i class="fa fa-box"></i>
+        <p>No products found {{ productSearchTerm ? 'matching search' : '' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============== ORDERS SECTION =============== -->
+  <div *ngIf="activeSection === 'orders' && !loading" class="section">
+    <div class="section-header">
+      <h2><i class="fa fa-shopping-cart"></i> Order Management</h2>
+    </div>
+
+    <div class="search-section">
+      <div class="search-box">
+        <i class="fa fa-search"></i>
+        <input 
+          type="text" 
+          [(ngModel)]="orderSearchTerm" 
+          placeholder="Search orders (customer name, email, or order number)"
+          class="search-input">
+      </div>
+    </div>
+
+    <div class="orders-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Order Number</th>
+            <th>Customer Name</th>
+            <th>Email</th>
+            <th>Total Amount</th>
+            <th>Status</th>
+            <th>Order Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of filteredOrders" [class.editing]="selectedOrder?._id === order._id">
+            <td>#{{ order._id.slice(-8) }}</td>
+            <td>{{ order.user.name }}</td>
+            <td>{{ order.user.email }}</td>
+            <td>{{ formatPrice(order.totalAmount) }}</td>
+            <td>
+              <span class="status-badge order-status-{{ order.status }}">
+                {{ getStatusText(order.status) }}
+              </span>
+            </td>
+            <td>{{ formatDate(order.createdAt) }}</td>
+            <td class="actions">
+              <button 
+                class="btn btn-sm btn-info" 
+                (click)="startEditOrder(order)" 
+                [disabled]="loading">
+                <i class="fa fa-edit"></i>
+                Edit Status
+              </button>
+              <button 
+                class="btn btn-sm btn-danger" 
+                (click)="deleteOrder(order._id)" 
+                [disabled]="loading">
+                <i class="fa fa-trash"></i>
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="filteredOrders.length === 0" class="no-results">
+        <i class="fa fa-shopping-cart"></i>
+        <p>No orders found {{ orderSearchTerm ? 'matching search' : '' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============== USER EDIT MODAL =============== -->
+  <div class="modal" *ngIf="isEditUserMode || isAddUserMode" (click)="isAddUserMode? cancelAddUser() : cancelEditUser()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isAddUserMode ? 'Add User' : 'Edit User' }}</h2>
+        <button class="close-btn" (click)="isAddUserMode ? cancelAddUser() : cancelEditUser()">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+
+      <form class="user-form" (ngSubmit)="isAddUserMode ? saveAddUser() : saveEditUser()">
+        <div class="form-group">
+          <label>Name *</label>
+          <input 
+            type="text" 
+            [(ngModel)]="userForm.name" 
+            name="name" 
+            required 
+            class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>Email *</label>
+          <input 
+            type="email" 
+            [(ngModel)]="userForm.email" 
+            name="email" 
+            required 
+            class="form-control">
+        </div>
+
+        <div class="form-group" *ngIf="isAddUserMode">
+          <label>Password *</label>
+          <input 
+            type="password" 
+            [(ngModel)]="userForm.password" 
+            name="password" 
+            required 
+            class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>Age</label>
+          <input 
+            type="number" 
+            [(ngModel)]="userForm.age" 
+            name="age" 
+            min="1" 
+            max="120" 
+            class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>Role</label>
+          <select [(ngModel)]="userForm.role" name="role" class="form-control">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label>
+            <input 
+              type="checkbox" 
+              [(ngModel)]="userForm.isConfirmed" 
+              name="isConfirmed">
+            <span class="checkmark"></span>
+            Confirmed Account
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            <i class="fa fa-save"></i>
+            Save Changes
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="isAddUserMode ? cancelAddUser() : cancelEditUser()" [disabled]="loading">
+            <i class="fa fa-times"></i>
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =============== PRODUCT ADD/EDIT MODAL =============== -->
+  <div class="modal" *ngIf="isEditProductMode || isAddProductMode" (click)="isEditProductMode ? cancelEditProduct() : cancelAddProduct()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isAddProductMode ? 'Add New Product' : 'Edit Product' }}</h2>
+        <button class="close-btn" (click)="isEditProductMode ? cancelEditProduct() : cancelAddProduct()">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      
+      <form class="product-form" (ngSubmit)="isAddProductMode ? saveAddProduct() : saveEditProduct()">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Product Name *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="productForm.name" 
+              name="name" 
+              required 
+              class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label>Category *</label>
+            <select 
+              [(ngModel)]="productForm.category" 
+              name="category" 
+              required 
+              class="form-control">
+              <option value="fashion">Fashion</option>
+              <option value="electronics">Electronics</option>
+              <option value="home">Home</option>
+              <option value="sports">Sports</option>
+              <option value="books">Books</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea 
+            [(ngModel)]="productForm.description" 
+            name="description" 
+            rows="3"
+            class="form-control"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Price *</label>
+            <input 
+              type="number" 
+              [(ngModel)]="productForm.price" 
+              name="price" 
+              step="0.01"
+              min="0"
+              required 
+              class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label>Stock Quantity *</label>
+            <input 
+              type="number" 
+              [(ngModel)]="productForm.stock" 
+              name="stock"
+              min="0"
+              required 
+              class="form-control">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Image URL</label>
+          <input 
+            type="text" 
+            [(ngModel)]="productForm.url" 
+            name="url" 
+        
+            class="form-control">
+        </div>
+
+       
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            <i class="fa fa-save"></i>
+            {{ isAddProductMode ? 'Add Product' : 'Save Changes' }}
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="isEditProductMode ? cancelEditProduct() : cancelAddProduct()" [disabled]="loading">
+            <i class="fa fa-times"></i>
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =============== ORDER STATUS EDIT MODAL =============== -->
+  <div class="modal" *ngIf="isEditOrderMode" (click)="cancelEditOrder()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Edit Order Status</h2>
+        <button class="close-btn" (click)="cancelEditOrder()">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="order-details" *ngIf="selectedOrder">
+        <div class="order-info">
+          <h3>Order Details</h3>
+          <p><strong>Order Number:</strong> #{{ selectedOrder._id.slice(-8) }}</p>
+          <p><strong>Customer Name:</strong> {{ selectedOrder.user.name }}</p>
+          <p><strong>Email:</strong> {{ selectedOrder.user.email }}</p>
+          <p><strong>Total Amount:</strong> {{ formatPrice(selectedOrder.totalAmount) }}</p>
+        </div>
+
+        <div class="order-items">
+          <h3>Ordered Products</h3>
+          <div class="items-list">
+            <div *ngFor="let item of selectedOrder.products" class="item">
+              <span class="item-name">{{ item.product.name }}</span>
+              <span class="item-details">Quantity: {{ item.quantity }} × {{ formatPrice(item.product.price) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <form class="order-form" (ngSubmit)="saveEditOrder()">
+        <div class="form-group">
+          <label>Order Status</label>
+          <select [(ngModel)]="orderForm.status" name="status" class="form-control" required>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            <i class="fa fa-save"></i>
+            Update Status
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="cancelEditOrder()" [disabled]="loading">
+            <i class="fa fa-times"></i>
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
